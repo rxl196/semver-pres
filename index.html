@@ -1,0 +1,520 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Semantic Versioning &amp; Our Release Process</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reset.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/night.css"
+    />
+    <style>
+      :root {
+        --major: #ff6b6b;
+        --minor: #ffd166;
+        --patch: #06d6a0;
+      }
+      .reveal h1,
+      .reveal h2 {
+        text-transform: none;
+      }
+      .reveal h2 {
+        font-size: 1.7em;
+      }
+      .major {
+        color: var(--major);
+      }
+      .minor {
+        color: var(--minor);
+      }
+      .patch {
+        color: var(--patch);
+      }
+      .muted {
+        color: #aaa;
+        font-size: 0.6em;
+      }
+
+      /* Slide 2: MAJOR.MINOR.PATCH */
+      .semver {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 0.3em;
+        margin-top: 0.5em;
+      }
+      .semver .part {
+        text-align: center;
+      }
+      .semver .num {
+        font-size: 2.6em;
+        font-weight: bold;
+        line-height: 1;
+      }
+      .semver .dot {
+        font-size: 2.6em;
+        font-weight: bold;
+        line-height: 1;
+      }
+      .semver .label {
+        font-size: 0.55em;
+        font-weight: bold;
+        letter-spacing: 0.05em;
+        margin-top: 0.3em;
+      }
+      .semver .desc {
+        font-size: 0.45em;
+        color: #ccc;
+        max-width: 9em;
+        margin: 0.3em auto 0;
+      }
+
+      /* Slide 3: examples table */
+      .reveal table.bumps {
+        font-size: 0.6em;
+        margin: 0.5em auto;
+      }
+      .reveal table.bumps td,
+      .reveal table.bumps th {
+        padding: 0.4em 0.8em;
+        border-bottom: 1px solid #444;
+        vertical-align: middle;
+      }
+      .reveal code.ver {
+        font-size: 1.1em;
+      }
+
+      /* Screenshot placeholders */
+      .reveal img.shot {
+        display: block;
+        margin: 0.4em auto;
+        max-width: 100%;
+        max-height: 400px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        border: 2px solid #555;
+        border-radius: 6px;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+      }
+      .reveal img.shot.wide {
+        width: 100%;
+        max-height: 420px;
+      }
+      /* Side-by-side layout for tall screenshots */
+      .split {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1.2em;
+        margin-top: 0.4em;
+      }
+      .split .split-text {
+        flex: 1;
+        text-align: left;
+        font-size: 0.6em;
+      }
+      .split .split-text .muted {
+        font-size: 0.85em;
+      }
+      .reveal .split img.shot {
+        margin: 0;
+        max-height: 470px;
+        max-width: 55%;
+      }
+      .placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        width: 70%;
+        height: 260px;
+        margin: 0.5em auto;
+        border: 3px dashed #666;
+        border-radius: 10px;
+        color: #888;
+        font-size: 0.5em;
+      }
+
+      /* Slide 6: flow diagram */
+      .flow {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: center;
+        gap: 0.25em;
+        margin-top: 0.6em;
+      }
+      .step {
+        background: #1f2a44;
+        border: 2px solid #4a90e2;
+        border-radius: 10px;
+        padding: 0.5em 0.4em;
+        width: 5.6em;
+        min-height: 5em;
+        font-size: 0.4em;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: center;
+      }
+      .step .who {
+        font-size: 0.75em;
+        color: #9ab;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.3em;
+      }
+      .step.rm {
+        border-color: var(--minor);
+      }
+      .step.jira {
+        border-color: var(--patch);
+      }
+      .step.gate {
+        border-color: #e0a030;
+      }
+      .arrow {
+        font-size: 0.6em;
+        color: #888;
+      }
+
+      /* Slide 7: glossary */
+      .reveal dl {
+        font-size: 0.5em;
+        text-align: left;
+        margin: 0 auto;
+        width: 90%;
+      }
+      .reveal dt {
+        font-weight: bold;
+        color: var(--minor);
+        margin-top: 0.4em;
+      }
+      .reveal dd {
+        margin-left: 1em;
+      }
+      .cols {
+        display: flex;
+        gap: 1.5em;
+      }
+      .cols > div {
+        flex: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <!-- 1. Title -->
+        <section>
+          <h1>Semantic Versioning</h1>
+          <h3>&amp; Our Release Process</h3>
+          <aside class="notes">
+            We're moving to microservices and a GitHub Actions deploy process.
+            Each service now has its own version number. This takes about three
+            minutes and covers what the numbers mean, where to find them, and
+            how they move from Jira into QA.
+          </aside>
+        </section>
+
+        <!-- 2. What is SemVer -->
+        <section>
+          <h2>What is SemVer?</h2>
+          <div class="semver">
+            <div class="part major">
+              <div class="num">2</div>
+              <div class="label">MAJOR</div>
+              <div class="desc">
+                Breaking change. Other systems may need to update.
+              </div>
+            </div>
+            <div class="dot">.</div>
+            <div class="part minor">
+              <div class="num">5</div>
+              <div class="label">MINOR</div>
+              <div class="desc">Backward-compatible new functionality.</div>
+            </div>
+            <div class="dot">.</div>
+            <div class="part patch">
+              <div class="num">1</div>
+              <div class="label">PATCH</div>
+              <div class="desc">
+                Backward-compatible bug fix, including security fixes.
+              </div>
+            </div>
+          </div>
+          <p class="fragment muted">
+            When one number goes up, every number to its right resets to 0.
+          </p>
+          <aside class="notes">
+            Every release gets three numbers. The version indicates the type of
+            change and expected compatibility, not operational risk. A security
+            fix that breaks compatibility needs a major bump. Every release
+            still needs testing.
+          </aside>
+        </section>
+
+        <!-- 3. Examples -->
+        <section>
+          <h2>Version Bumps</h2>
+          <p class="muted">
+            <strong>PSG-CIS-Tax-Service</strong>, example version:
+            <code class="ver">1.4.2</code>
+          </p>
+          <table class="bumps">
+            <thead>
+              <tr>
+                <th>What changed</th>
+                <th>Bump</th>
+                <th>New version</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="fragment">
+                <td>Bug fix / security fix; existing consumers still work</td>
+                <td class="patch">PATCH</td>
+                <td>
+                  <code class="ver">1.4.<span class="patch">3</span></code>
+                </td>
+              </tr>
+              <tr class="fragment">
+                <td>Optional response field added; existing consumers still work</td>
+                <td class="minor">MINOR</td>
+                <td>
+                  <code class="ver">1.<span class="minor">5</span>.0</code>
+                </td>
+              </tr>
+              <tr class="fragment">
+                <td>API contract changed (consumers must update)</td>
+                <td class="major">MAJOR</td>
+                <td>
+                  <code class="ver"><span class="major">2</span>.0.0</code>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <aside class="notes">
+            These are independent examples, each starting from 1.4.2. A patch
+            fixes a bug without breaking compatibility. A minor bump adds
+            functionality while existing consumers continue to work. Adding a
+            required request field could instead be breaking. A major bump means
+            other teams or services may need changes, so give them a heads-up
+            in planning. All three types still need testing.
+          </aside>
+        </section>
+
+        <!-- 4a. Release cut pipeline -->
+        <section>
+          <h2>Creating a Release Version</h2>
+          <p style="font-size: 0.55em">
+            Repo → <strong>Actions</strong> tab → <strong>[PSG-OPS] Java -
+            Pipeline</strong> → <strong>Run workflow</strong>
+          </p>
+          <img
+            class="shot wide"
+            src="images/release-cut-pipeline.png"
+            alt="GitHub Actions Run workflow dialog for the PSG-OPS Java Pipeline, using develop branch and version v1.0.4"
+          />
+          <p class="muted">
+            Run from the <code>develop</code> branch, enter the new version
+            (e.g. <code>v1.0.4</code>), and click <strong>Run workflow</strong>.
+          </p>
+          <aside class="notes">
+            In the microservice repo, open the Actions tab and select the
+            [PSG-OPS] Java - Pipeline workflow. Click Run workflow, keep the
+            branch as develop, type the version to create, choose whether to
+            mark it as latest, select the develop environment, and run. This
+            creates the release version on develop.
+          </aside>
+        </section>
+
+        <!-- 4. GitHub -->
+        <section>
+          <h2>Versions in GitHub</h2>
+          <p style="font-size: 0.55em">
+            Repo home page → right sidebar → <strong>Releases</strong> (or the
+            <strong>Tags</strong> tab)
+          </p>
+          <img
+            class="shot wide"
+            src="images/github-releases.png"
+            alt="Illustrative GitHub release for Tax Service, version v1.0.2"
+          />
+          <!-- <div class="placeholder">
+        <div>📸 Screenshot placeholder</div>
+        <div><code>images/github-releases.png</code></div>
+      </div> -->
+          <p class="muted">
+            Illustrative screenshot: Tax Service <code>v1.0.2</code>.
+            Release notes list the included changes.
+          </p>
+          <aside class="notes">
+            Open the service's repo in GitHub. The Releases section in the right
+            sidebar shows the latest version. Click it to see every release and
+            its notes. This screenshot illustrates where to look; it is not
+            the hypothetical release from the version-bump examples.
+          </aside>
+        </section>
+
+        <!-- 5. Jira Fix Version -->
+        <section>
+          <h2>Jira: <em>Fix Version</em></h2>
+          <div class="split">
+            <img
+              class="shot"
+              src="images/jira-fix-version.png"
+              alt="Illustrative Jira ticket showing Fix versions 1.0.0 for PSG-Cart-Service"
+            />
+            <div class="split-text">
+              <p>
+                Each ticket's <strong>Fix Version</strong> field shows the
+                release that contains it.
+              </p>
+              <p class="muted">
+                Check the ticket's Fix Version, then confirm that release is
+                deployed to QA.
+              </p>
+              <p class="muted">
+                Illustrative screenshot: Cart Service <code>1.0.0</code>.
+              </p>
+            </div>
+          </div>
+          <aside class="notes">
+            This is the link between Jira and GitHub. If someone asks whether a
+            ticket is in QA, check its Fix Version, then check which version
+            Release Management deployed. Fix Version alone does not confirm
+            deployment status. This screenshot is a separate service example,
+            not the Tax Service release shown on the previous slide.
+          </aside>
+        </section>
+
+        <!-- 6. Release flow -->
+        <section>
+          <h2>Our Release Flow</h2>
+          <p class="muted">PM/BA = project manager / business analyst</p>
+          <div class="flow">
+            <div class="step jira fragment" data-fragment-index="0">
+              <div class="who">Jira</div>
+              Ticket created
+            </div>
+            <div class="arrow fragment" data-fragment-index="1">➜</div>
+            <div class="step fragment" data-fragment-index="1">
+              <div class="who">Developer</div>
+              Change merged to <code>develop</code>
+            </div>
+            <div class="arrow fragment" data-fragment-index="2">➜</div>
+            <div class="step fragment" data-fragment-index="2">
+              <div class="who">Developer</div>
+              Cuts release <code>vX.Y.Z</code>
+            </div>
+            <div class="arrow fragment" data-fragment-index="3">➜</div>
+            <div class="step gate fragment" data-fragment-index="3">
+              <div class="who">Gatekeeper</div>
+              Approves the release
+            </div>
+          </div>
+          <div class="flow">
+            <div class="step fragment" data-fragment-index="4">
+              <div class="who">Developer</div>
+              Notifies PM/BA of the <strong>version number</strong>
+            </div>
+            <div class="arrow fragment" data-fragment-index="5">➜</div>
+            <div class="step jira fragment" data-fragment-index="5">
+              <div class="who">PM/BA</div>
+              Sets Jira <em>Fix Version</em>
+            </div>
+            <div class="arrow fragment" data-fragment-index="6">➜</div>
+            <div class="step rm fragment" data-fragment-index="6">
+              <div class="who">Release Mgmt</div>
+              Deploys version to <strong>QA</strong>
+            </div>
+            <div class="arrow fragment" data-fragment-index="7">➜</div>
+            <div class="step rm fragment" data-fragment-index="7">
+              <div class="who">Release Mgmt</div>
+              Promotes same version to later envs
+            </div>
+          </div>
+          <p class="muted fragment" data-fragment-index="8">
+            The release is not complete until a repo gatekeeper approves it.<br />
+            Developer supplies the version; PM/BA records it;<br />
+            Release Management deploys it. Same version in every environment.
+          </p>
+          <aside class="notes">
+            The developer picks the bump type based on what changed in the
+            service and cuts the release. A gatekeeper of the repo must approve
+            it before the deploy/version cut is complete. After the approval,
+            the developer notifies the PM/BA (project manager/business analyst)
+            of the correct version number. The PM/BA adds that version to the Jira
+            ticket's Fix Version field. Release Management deploys that exact
+            version to QA. When the release schedule allows, the same version
+            is promoted to the later environments. It is not rebuilt.
+            Developer supplies the version; PM/BA records it; Release Management
+            deploys it.
+          </aside>
+        </section>
+
+        <!-- 7. Glossary / FAQ -->
+        <section>
+          <h2>Glossary &amp; Q&amp;A</h2>
+          <div class="cols">
+            <div>
+              <dl>
+                <dt>Release</dt>
+                <dd>A published, numbered version of a service in GitHub.</dd>
+                <dt>Tag</dt>
+                <dd>
+                  The Git label (e.g. <code>v1.4.3</code>) that a release points
+                  to.
+                </dd>
+                <dt>Fix Version</dt>
+                <dd>The Jira field that links a ticket to a release.</dd>
+                <dt>Breaking change</dt>
+                <dd>
+                  A change that requires other systems to update. This means a
+                  MAJOR bump.
+                </dd>
+              </dl>
+            </div>
+            <div>
+              <dl>
+                <dt>Why did the major version jump?</dt>
+                <dd>
+                  Something changed that consumers need to adapt to. Check the
+                  release notes.
+                </dd>
+                <dt>Do all services share one version?</dt>
+                <dd>No. Each microservice has its own version.</dd>
+                <dt>Who deploys?</dt>
+                <dd>Release Management, based on the release schedule.</dd>
+              </dl>
+            </div>
+          </div>
+          <aside class="notes">
+            Leave this slide up as a reference for questions; do not read every
+            entry aloud. The core presentation ends with the release-flow
+            takeaway.
+          </aside>
+        </section>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/plugin/notes/notes.js"></script>
+    <script>
+      Reveal.initialize({
+        hash: true,
+        slideNumber: 'c/t',
+        plugins: [RevealNotes],
+      });
+    </script>
+  </body>
+</html>
